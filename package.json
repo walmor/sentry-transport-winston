@@ -1,0 +1,30 @@
+{
+  "name": "sentry-transport-winston",
+  "version": "0.0.1",
+  "description": "A Sentry Transport for Winston v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walmor/sentry-transport-winston.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "test",
+    "prepare": "tsc"
+  },
+  "keywords": [
+    "sentry",
+    "winston"
+  ],
+  "author": "Walmor Moreira",
+  "license": "MIT",
+  "dependencies": {
+    "@sentry/node": "^5.5.0",
+    "winston": "^3.2.1",
+    "winston-transport": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^12.6.2"
+  }
+}
