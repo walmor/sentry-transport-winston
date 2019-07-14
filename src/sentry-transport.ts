@@ -1,4 +1,4 @@
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import Transport from 'winston-transport';
 
 import { SentryLevelsMap, DEFAULT_LEVELS_MAP } from './sentry-levels-map';
