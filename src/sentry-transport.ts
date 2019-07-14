@@ -23,7 +23,7 @@ export class SentryTransport extends Transport {
   log(info: any, next: () => void): any {
     let { level, message, error, tags, user, ...extra } = info;
 
-    level = this.levelsMap[level] || this.levelsMap.error;
+    level = this.levelsMap[level] || Sentry.Severity.Error;
 
     Sentry.withScope(scope => {
       scope.setLevel(level);
