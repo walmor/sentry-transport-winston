@@ -1,12 +1,14 @@
+import { Severity } from '@sentry/node';
+
 export interface SentryLevelsMap {
-  [level: string]: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
+  [level: string]: Severity;
 }
 
 export const DEFAULT_LEVELS_MAP: SentryLevelsMap = {
-  error: 'error',
-  warn: 'warning',
-  info: 'info',
-  verbose: 'debug',
-  debug: 'debug',
-  silly: 'debug',
+  error: Severity.Error,
+  warn: Severity.Warning,
+  info: Severity.Info,
+  verbose: Severity.Log,
+  debug: Severity.Debug,
+  silly: Severity.Debug,
 };

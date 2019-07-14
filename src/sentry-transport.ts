@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import Transport from 'winston-transport';
 
 import { SentryLevelsMap, DEFAULT_LEVELS_MAP } from './sentry-levels-map';
-import { isSentryUser } from './helpers';
 
 export interface SentryTransportOpts extends Transport.TransportStreamOptions {
   sentryOpts: Sentry.NodeOptions;
@@ -21,20 +20,18 @@ export class SentryTransport extends Transport {
   }
 
   log(info: any, next: () => void): any {
-    let { level, message, error, tags, user, ...extra } = info;
-
-    level = this.levelsMap[level] || Sentry.Severity.Error;
-
     Sentry.withScope(scope => {
-      scope.setLevel(level);
+      const { level, message, error, tags, user, ...extra } = info;
+
+      scope.setLevel(this.levelsMap[level]);
 
       if (tags) {
         scope.setTags(tags);
       }
 
-      if (isSentryUser(user)) {
+      if (SentryTransport.isSentryUser(user)) {
         scope.setUser(user);
-      } else {
+      } else if (user) {
         extra.user = user;
       }
 
@@ -42,17 +39,28 @@ export class SentryTransport extends Transport {
         extra.message = message;
       }
 
-      for (const key in extra) {
-        scope.setExtra(key, extra[key]);
-      }
+      scope.setExtras(extra);
 
       if (error) {
         Sentry.captureException(error);
-      } else if (message) {
+      } else {
         Sentry.captureMessage(message);
       }
 
       next();
     });
+  }
+
+  static isSentryUser(user: any): user is Sentry.User {
+    if (!user) {
+      return false;
+    }
+
+    return (
+      typeof user.id === 'string' ||
+      typeof user.username === 'string' ||
+      typeof user.email === 'string' ||
+      typeof user.ip_address === 'string'
+    );
   }
 }

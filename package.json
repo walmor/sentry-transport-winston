@@ -2,6 +2,12 @@
   "name": "sentry-transport-winston",
   "version": "0.0.1",
   "description": "A Sentry Transport for Winston v3",
+  "author": "Walmor Moreira",
+  "license": "MIT",
+  "keywords": [
+    "sentry",
+    "winston"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/walmor/sentry-transport-winston.git"
@@ -13,21 +19,33 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "test",
+    "test": "jest --watch",
+    "test:cov": "jest --coverage",
     "prepare": "tsc"
   },
-  "keywords": [
-    "sentry",
-    "winston"
-  ],
-  "author": "Walmor Moreira",
-  "license": "MIT",
   "dependencies": {
     "@sentry/node": "^5.5.0",
     "winston": "^3.2.1",
     "winston-transport": "^4.3.0"
   },
   "devDependencies": {
-    "@types/node": "^12.6.2"
+    "@types/jest": "^24.0.15",
+    "@types/node": "^12.6.2",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-lint": "^4.5.1",
+    "typescript": "^3.5.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "ts"
+    ],
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node"
   }
 }
