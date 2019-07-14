@@ -8,5 +8,5 @@ export const DEFAULT_LEVELS_MAP: SentryLevelsMap = {
   info: 'info',
   verbose: 'debug',
   debug: 'debug',
-  silly: 'debug'
+  silly: 'debug',
 };

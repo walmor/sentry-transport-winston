@@ -1,7 +1,7 @@
 import Sentry from '@sentry/node';
 
 export function isSentryUser(user: any): user is Sentry.User {
-  if (!user) return false;
+  if (!user) { return false; }
 
   return (
     typeof user.id === 'string' ||
