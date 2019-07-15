@@ -1,5 +1,7 @@
-import { SentryTransport, SentryTransportOpts } from '../src';
 import * as Sentry from '@sentry/node';
+import * as winston from 'winston';
+
+import { SentryTransport, SentryTransportOpts } from '../src';
 import { DEFAULT_LEVELS_MAP, SentryLevelsMap } from '../src/sentry-levels-map';
 
 jest.mock('@sentry/node');
@@ -11,47 +13,47 @@ afterEach(() => {
 describe('The SentryTransport', () => {
   describe('when checking if a user is a Sentry user', () => {
     it('should return false if the user is undefined', () => {
-      const result = SentryTransport.isSentryUser(undefined);
+      const result = getSentryTransport().isSentryUser(undefined);
       expect(result).toBe(false);
     });
 
     it('should return false if the user is null', () => {
-      const result = SentryTransport.isSentryUser(undefined);
+      const result = getSentryTransport().isSentryUser(undefined);
       expect(result).toBe(false);
     });
 
     it('should return false if the user is not an object', () => {
-      const result = SentryTransport.isSentryUser('test-user');
+      const result = getSentryTransport().isSentryUser('test-user');
       expect(result).toBe(false);
     });
 
     it('should return false if the user does not have any properties', () => {
-      const result = SentryTransport.isSentryUser({});
+      const result = getSentryTransport().isSentryUser({});
       expect(result).toBe(false);
     });
 
     it('should return false if the user has only a numeric id property', () => {
-      const result = SentryTransport.isSentryUser({ id: 999 });
+      const result = getSentryTransport().isSentryUser({ id: 999 });
       expect(result).toBe(false);
     });
 
     it('should return true if the user has a stringified id property', () => {
-      const result = SentryTransport.isSentryUser({ id: '999' });
+      const result = getSentryTransport().isSentryUser({ id: '999' });
       expect(result).toBe(true);
     });
 
     it('should return true if the user has a username property', () => {
-      const result = SentryTransport.isSentryUser({ username: 'test-user ' });
+      const result = getSentryTransport().isSentryUser({ username: 'test-user ' });
       expect(result).toBe(true);
     });
 
     it('should return true if the user has an email property', () => {
-      const result = SentryTransport.isSentryUser({ email: 'test-user@example.com' });
+      const result = getSentryTransport().isSentryUser({ email: 'test-user@example.com' });
       expect(result).toBe(true);
     });
 
     it('should return true if the user has an ip_address property', () => {
-      const result = SentryTransport.isSentryUser({ ip_address: '127.0.0.1' });
+      const result = getSentryTransport().isSentryUser({ ip_address: '127.0.0.1' });
       expect(result).toBe(true);
     });
   });
@@ -98,124 +100,129 @@ describe('The SentryTransport', () => {
   describe('when logging', () => {
     it('should set the scope level', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
-      const info = { level: 'error', message: 'Error messsage.' };
+      const level = 'error';
 
-      tranport.log(info, () => {});
+      logger.log(level, 'Error messsage.');
 
-      expect(scope.setLevel).toHaveBeenCalledWith(info.level);
+      expect(scope.setLevel).toHaveBeenCalledWith(level);
     });
 
     it('should set the scope tags', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
       const tags = { value1: 'v1', value2: 'v2' };
-      const info = { level: 'info', message: 'Error messsage.', tags };
 
-      tranport.log(info, () => {});
+      logger.error('Error messsage.', { tags });
 
-      expect(scope.setTags).toHaveBeenCalledWith(info.tags);
+      expect(scope.setTags).toHaveBeenCalledWith(tags);
+    });
+
+    it('should not set any extra info if nothing is passed', () => {
+      const scope = getMockedScope();
+      const logger = getLogger();
+
+      logger.error('Error messsage.');
+
+      expect(scope.setExtras).not.toHaveBeenCalled();
     });
 
     it('should set the scope user if it is a valid Sentry user', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
-      const info = { level: 'error', user: { id: '1212' }, message: 'Error message.' };
+      const user = { id: '1212' };
 
-      tranport.log(info, () => {});
+      logger.error('Error message.', { user });
 
-      expect(scope.setUser).toHaveBeenCalledWith(info.user);
+      expect(scope.setUser).toHaveBeenCalledWith(user);
+      expect(scope.setExtras).not.toHaveBeenCalled();
     });
 
     it('should set the user as extra info if it is not a valid Sentry user', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
-      const info = { level: 'error', user: 'test-user', message: 'Error message.' };
+      const user = 'stringified-user';
 
-      tranport.log(info, () => {});
+      logger.error('Error message.', { user });
 
       expect(scope.setUser).not.toHaveBeenCalled();
-      expect(scope.setExtras).toHaveBeenCalledWith({ user: info.user });
-    });
-
-    it('should set the message as extra info when logging an error', () => {
-      const scope = getMockedScope();
-      const tranport = getSentryTransport();
-
-      const error = new Error('Error message');
-      const info = { level: 'error', message: 'Custom error message.', error };
-
-      tranport.log(info, () => {});
-
-      expect(scope.setExtras).toHaveBeenCalledWith({ message: info.message });
+      expect(scope.setExtras).toHaveBeenCalledWith({ user });
     });
 
     it('should set the scope extra info when additional properties are provided', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
       const extra = { extra1: 'ex1', extra2: 'ex2' };
-      const info = { level: 'error', message: 'Error message.', ...extra };
 
-      tranport.log(info, () => {});
+      logger.error('Error message.', { ...extra });
 
       expect(scope.setExtras).toHaveBeenCalledWith(extra);
     });
 
-    it('should call the captureMessage method when logging a message', () => {
+    it('should call the captureMessage method when logging a string message', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
-      const info = { level: 'debug', message: 'Error message.' };
+      const message = 'Error message.';
 
-      tranport.log(info, () => {});
+      logger.error(message);
 
-      expect(Sentry.captureMessage).toHaveBeenCalledWith(info.message);
+      expect(Sentry.captureMessage).toHaveBeenCalledWith(message);
     });
 
     it('should call the captureException method when logging an error', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
       const error = new Error('Error message');
-      const info = { level: 'debug', message: 'Error message.', error };
 
-      tranport.log(info, () => {});
+      logger.error(error);
 
       expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
 
-    it('should call the next callback', () => {
+    it('should call the captureException method when logging an error with extra info', () => {
       const scope = getMockedScope();
-      const tranport = getSentryTransport();
+      const logger = getLogger();
 
-      const info = { level: 'debug', message: 'Error message.' };
-      const next = jest.fn();
+      const extra = { extra1: 'ex1', extra2: 'ex2' };
+      const error = new Error('Error message');
+      const info = { message: error.message, stack: error.stack, ...extra };
 
-      tranport.log(info, next);
+      logger.error(info);
 
-      expect(next).toHaveBeenCalled();
+      expect(Sentry.captureException).toHaveBeenCalledWith(info);
+    });
+  });
+
+  function getSentryTransport() {
+    return new SentryTransport({ sentryOpts: {} });
+  }
+
+  function getLogger() {
+    const transport = getSentryTransport();
+    const logger = winston.createLogger({
+      transports: [transport],
     });
 
-    function getSentryTransport() {
-      return new SentryTransport({ sentryOpts: {} });
-    }
+    return logger;
+  }
 
-    function getMockedScope() {
-      const scope = ({
-        setLevel: jest.fn(),
-        setTags: jest.fn(),
-        setUser: jest.fn(),
-        setExtras: jest.fn(),
-      } as unknown) as Sentry.Scope;
+  function getMockedScope() {
+    const scope = ({
+      setLevel: jest.fn(),
+      setTags: jest.fn(),
+      setUser: jest.fn(),
+      setExtras: jest.fn(),
+    } as unknown) as Sentry.Scope;
 
-      jest.spyOn(Sentry, 'withScope').mockImplementationOnce(fn => fn(scope));
+    jest.spyOn(Sentry, 'withScope').mockImplementationOnce(fn => fn(scope));
 
-      return scope;
-    }
-  });
+    return scope;
+  }
 });

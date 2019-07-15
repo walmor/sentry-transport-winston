@@ -3,6 +3,10 @@ import Transport from 'winston-transport';
 
 import { SentryLevelsMap, DEFAULT_LEVELS_MAP } from './sentry-levels-map';
 
+interface ExtraObject {
+  [key: string]: any;
+}
+
 export interface SentryTransportOpts extends Transport.TransportStreamOptions {
   sentryOpts: Sentry.NodeOptions;
   levelsMap?: SentryLevelsMap;
@@ -21,7 +25,7 @@ export class SentryTransport extends Transport {
 
   log(info: any, next: () => void): any {
     Sentry.withScope(scope => {
-      const { level, message, error, tags, user, ...extra } = info;
+      const { level, message, tags, user, ...rest } = info;
 
       scope.setLevel(this.levelsMap[level]);
 
@@ -29,17 +33,25 @@ export class SentryTransport extends Transport {
         scope.setTags(tags);
       }
 
-      if (SentryTransport.isSentryUser(user)) {
+      const extra = this.getExtra(rest);
+
+      if (this.isSentryUser(user)) {
         scope.setUser(user);
       } else if (user) {
         extra.user = user;
       }
 
-      if (error && message) {
-        extra.message = message;
+      if (Object.keys(extra).length > 0) {
+        scope.setExtras(extra);
       }
 
-      scope.setExtras(extra);
+      let error = null;
+
+      if (this.isError(info)) {
+        error = info;
+      } else if (this.isError(message)) {
+        error = message;
+      }
 
       if (error) {
         Sentry.captureException(error);
@@ -51,7 +63,7 @@ export class SentryTransport extends Transport {
     });
   }
 
-  static isSentryUser(user: any): user is Sentry.User {
+  isSentryUser(user: any): user is Sentry.User {
     if (!user) {
       return false;
     }
@@ -62,5 +74,22 @@ export class SentryTransport extends Transport {
       typeof user.email === 'string' ||
       typeof user.ip_address === 'string'
     );
+  }
+
+  private isError(obj: any): boolean {
+    if (!obj) {
+      return false;
+    }
+
+    return typeof obj.message === 'string' && typeof obj.stack === 'string';
+  }
+
+  private getExtra(rest: object): ExtraObject {
+    const entries = Object.entries(rest);
+
+    return entries.reduce((extra: ExtraObject, [key, value]) => {
+      extra[key] = value;
+      return extra;
+    }, {});
   }
 }
