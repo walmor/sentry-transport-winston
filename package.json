@@ -6,7 +6,11 @@
   "license": "MIT",
   "keywords": [
     "sentry",
-    "winston"
+    "winston",
+    "winston3",
+    "transport",
+    "logger",
+    "logging"
   ],
   "repository": {
     "type": "git",
