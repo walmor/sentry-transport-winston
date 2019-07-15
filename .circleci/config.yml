@@ -8,6 +8,10 @@ jobs:
       - checkout
 
       - run:
+          name: Install
+          command: npm install
+
+      - run:
           name: Lint
           command: npm run lint
 
