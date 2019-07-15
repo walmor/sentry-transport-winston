@@ -1,5 +1,7 @@
 # A Sentry Transport for Winston@3
 
+![CircleCI](https://img.shields.io/circleci/build/github/walmor/sentry-transport-winston.svg)
+[![codecov](https://codecov.io/gh/walmor/sentry-transport-winston/branch/master/graph/badge.svg)](https://codecov.io/gh/walmor/sentry-transport-winston)
 ![winston](https://img.shields.io/badge/winston-v3.2.1-informational.svg)
 ![sentry](https://img.shields.io/badge/sentry-v5.5.0-informational.svg)
 
