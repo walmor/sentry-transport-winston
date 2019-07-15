@@ -25,12 +25,16 @@ export class SentryTransport extends Transport {
 
   log(info: any, next: () => void): any {
     Sentry.withScope(scope => {
-      const { level, message, tags, user, ...rest } = info;
+      const { level, message, tags, user, fingerprint, ...rest } = info;
 
       scope.setLevel(this.levelsMap[level]);
 
       if (tags) {
         scope.setTags(tags);
+      }
+
+      if (fingerprint) {
+        scope.setFingerprint(Array.isArray(fingerprint) ? fingerprint : [fingerprint]);
       }
 
       const extra = this.getExtra(rest);

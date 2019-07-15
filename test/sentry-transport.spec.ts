@@ -120,6 +120,28 @@ describe('The SentryTransport', () => {
       expect(scope.setTags).toHaveBeenCalledWith(tags);
     });
 
+    it('should set the scope fingerprint', () => {
+      const scope = getMockedScope();
+      const logger = getLogger();
+
+      const fingerprint = ['any-fingerprint'];
+
+      logger.error('Error messsage.', { fingerprint });
+
+      expect(scope.setFingerprint).toHaveBeenCalledWith(fingerprint);
+    });
+
+    it('should set the scope fingerprint even if passed as a value', () => {
+      const scope = getMockedScope();
+      const logger = getLogger();
+
+      const fingerprint = 'any-fingerprint-value';
+
+      logger.error('Error messsage.', { fingerprint });
+
+      expect(scope.setFingerprint).toHaveBeenCalledWith([fingerprint]);
+    });
+
     it('should not set any extra info if nothing is passed', () => {
       const scope = getMockedScope();
       const logger = getLogger();
@@ -219,6 +241,7 @@ describe('The SentryTransport', () => {
       setTags: jest.fn(),
       setUser: jest.fn(),
       setExtras: jest.fn(),
+      setFingerprint: jest.fn(),
     } as unknown) as Sentry.Scope;
 
     jest.spyOn(Sentry, 'withScope').mockImplementationOnce(fn => fn(scope));
