@@ -23,7 +23,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "prepare": "tsc"
+    "preversion": "npm run lint && npm test",
+    "postversion": "git push origin master --tags"
   },
   "dependencies": {
     "@sentry/node": "^5.5.0",
