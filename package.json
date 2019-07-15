@@ -18,8 +18,10 @@
     "dist"
   ],
   "scripts": {
+    "lint": "tslint -p tsconfig.json",
     "build": "tsc",
-    "test": "jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "prepare": "tsc"
   },
@@ -33,7 +35,7 @@
     "@types/node": "^12.6.2",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
-    "ts-lint": "^4.5.1",
+    "tslint": "^5.18.0",
     "typescript": "^3.5.3"
   },
   "jest": {
