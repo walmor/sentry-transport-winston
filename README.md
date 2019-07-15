@@ -77,9 +77,9 @@ logger.error(new Error('Error message'));
 You can [tag an event](https://docs.sentry.io/enriching-error-data/context/?platform=node#tagging-events) using the `tags` property:
 
 ```typescript
-const user = { username: 'test-user' };
+const tags = { module: 'users', language: 'english' };
 
-logger.error('Error message.', { user });
+logger.error('Error message.', { tags });
 ```
 
 ### User
