@@ -8,7 +8,7 @@ export const DEFAULT_LEVELS_MAP: SentryLevelsMap = {
   error: Severity.Error,
   warn: Severity.Warning,
   info: Severity.Info,
-  verbose: Severity.Log,
+  verbose: Severity.Info,
   debug: Severity.Debug,
   silly: Severity.Debug,
 };
