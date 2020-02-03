@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import Transport from 'winston-transport';
+import Transport, * as Transports from 'winston-transport';
 
 import { SentryLevelsMap, DEFAULT_LEVELS_MAP } from './sentry-levels-map';
 
@@ -7,7 +7,7 @@ interface ExtraObject {
   [key: string]: any;
 }
 
-export interface SentryTransportOpts extends Transport.TransportStreamOptions {
+export interface SentryTransportOpts extends Transports.TransportStreamOptions {
   sentryOpts: Sentry.NodeOptions;
   levelsMap?: SentryLevelsMap;
 }
