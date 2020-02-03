@@ -1,6 +1,6 @@
 {
   "name": "sentry-transport-winston",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Sentry Transport for Winston v3",
   "author": "Walmor Moreira",
   "license": "MIT",
